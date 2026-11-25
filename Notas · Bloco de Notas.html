@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notas · Bloco de Notas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Inter:wght@400;600;700&family=JetBrains+Mono&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Poppins:wght@400;600&display=swap">
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f4f2ec;--panel:#fff;--panel2:#faf9f5;--text:#2a2926;--muted:#8a867e;--line:#e5e1d7;
+  --accent:#d98f1f;--on:#fff;--sel:#fbf0dc;--danger:#c0392b;--shadow:0 8px 30px rgba(0,0,0,.12);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151513;--panel:#202020;--panel2:#1b1b19;--text:#ecebe6;--muted:#9a968d;--line:#333230;
+  --accent:#f0b34f;--on:#1a1a18;--sel:#38301f;--danger:#ef6b5b;--shadow:0 8px 30px rgba(0,0,0,.5);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151513;--panel:#202020;--panel2:#1b1b19;--text:#ecebe6;--muted:#9a968d;--line:#333230;
+  --accent:#f0b34f;--on:#1a1a18;--sel:#38301f;--danger:#ef6b5b;--shadow:0 8px 30px rgba(0,0,0,.5);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;font-size:15px}
+button,input,textarea,select{font:inherit;color:inherit}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:1.05rem;display:flex;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:7px 11px;cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--sel);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--on);border-color:var(--accent);font-weight:600}
+.btn.danger{color:var(--danger)}
+.ghost{border:0;background:transparent}
+main{flex:1;display:grid;grid-template-columns:330px 1fr;min-height:0}
+aside{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.tools{padding:12px;display:grid;gap:8px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+input[type=search],select{width:100%;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel2)}
+nav{display:flex;gap:6px;padding:0 12px 8px;flex-wrap:wrap}
+nav .btn{padding:5px 10px;font-size:.85rem;border-radius:99px}
+#tags{display:flex;gap:6px;padding:0 12px 10px;flex-wrap:wrap}
+#tags .btn{padding:2px 9px;font-size:.78rem;border-radius:99px;color:var(--muted)}
+#list{flex:1;overflow-y:auto;margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+#list li{padding:11px 14px 11px 16px;border-bottom:1px solid var(--line);cursor:pointer;border-left:4px solid transparent}
+#list li.sel{background:var(--sel)}
+#list b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#list small{display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{color:var(--muted);text-align:center;padding:28px;cursor:default!important}
+.count{padding:8px 14px;color:var(--muted);font-size:.78rem;border-top:1px solid var(--line)}
+section{display:flex;flex-direction:column;min-height:0;padding:14px 20px;gap:10px;min-width:0}
+.top{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.top .sp{flex:1}
+.dots{display:flex;gap:5px;margin-right:6px}
+.dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
+.dot.on{outline:2px solid var(--text);outline-offset:1px}
+.fmt{display:flex;gap:4px;flex-wrap:wrap}
+.fmt .btn{padding:4px 9px;font-size:.85rem}
+#title{border:0;background:transparent;font-size:1.7rem;font-weight:700;outline:none;width:100%;padding:0}
+#body,#prev{flex:1;min-height:0;border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--panel);line-height:1.65;font-size:1rem;outline:none;overflow:auto}
+#body{resize:none;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95rem}
+#body:focus{border-color:var(--accent)}
+#prev h1,#prev h2,#prev h3{margin:.6em 0 .3em}
+#prev blockquote{margin:.6em 0;padding:.2em 1em;border-left:3px solid var(--accent);color:var(--muted)}
+#prev code{background:var(--panel2);padding:1px 5px;border-radius:5px;font-family:ui-monospace,Menlo,monospace}
+#prev ul{padding-left:1.3em}
+#prev .tag{color:var(--accent);font-weight:600}
+#prev li.chk{list-style:none;margin-left:-1.2em}
+.foot{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.8rem;flex-wrap:wrap}
+#none{margin:auto;text-align:center;color:var(--muted)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(120px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;display:flex;gap:14px;align-items:center;transition:.25s;box-shadow:var(--shadow);z-index:9}
+#toast.show{transform:translateX(-50%)}
+#toast button{background:none;border:0;color:var(--accent);font-weight:700;cursor:pointer}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;max-width:520px;width:calc(100% - 32px);box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog h2{margin-top:0}
+dialog kbd{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:.8rem}
+dialog li{margin:4px 0}
+.back{display:none}
+@media (max-width:760px){
+  main{grid-template-columns:1fr}
+  aside{border-right:0}
+  section{display:none}
+  main.editing aside{display:none}
+  main.editing section{display:flex}
+  .back{display:inline-block}
+  #title{font-size:1.4rem}
+}
+body{font-family:var(--ui,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif)}
+#title{font-family:var(--note,inherit)}
+#body{font-family:var(--note,ui-monospace,Menlo,Consolas,monospace);font-size:calc(.95rem*var(--fs,1))}
+#prev{font-family:var(--note,inherit);font-size:calc(1rem*var(--fs,1))}
+#lookdlg{max-height:90vh;overflow:auto}
+.lbl{margin:16px 0 6px;font-weight:600}
+.sws{display:flex;gap:10px;flex-wrap:wrap}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
+.sw.on{outline:3px solid var(--text);outline-offset:2px}
+#demo{margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-family:var(--note,ui-monospace,Menlo,monospace);font-size:calc(1rem*var(--fs,1))}
+#demo b{color:var(--accent)}
+#fsz{width:100%;accent-color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>📝 Notas <span style="font-weight:400;color:var(--muted)">· Bloco de Notas</span></h1>
+  <div class="row" style="flex:none">
+    <button class="btn" id="lookbtn" title="Cores, temas e fontes">🎨 Aparência</button>
+    <button class="btn" id="about" title="Sobre o projeto">ℹ️ Sobre</button>
+    <button class="btn" id="theme" title="Alternar tema" aria-label="Alternar tema">🌓</button>
+  </div>
+</header>
+
+<main id="main">
+  <aside>
+    <div class="tools">
+      <button class="btn primary" id="new">+ Nova nota</button>
+      <input id="search" type="search" placeholder="Buscar (Ctrl+K)…">
+      <select id="sort" aria-label="Ordenar">
+        <option value="updated">Mais recentes</option>
+        <option value="created">Data de criação</option>
+        <option value="title">Título (A–Z)</option>
+      </select>
+    </div>
+    <nav id="filters">
+      <button class="btn on" data-f="all">Todas</button>
+      <button class="btn" data-f="pinned">📌 Fixadas</button>
+      <button class="btn" data-f="trash">🗑️ Lixeira</button>
+    </nav>
+    <div id="tags"></div>
+    <ul id="list"></ul>
+    <div class="count" id="count"></div>
+  </aside>
+
+  <section id="editor">
+    <div class="top">
+      <button class="btn back" id="back">← Voltar</button>
+      <div class="dots" id="dots"></div>
+      <span class="sp"></span>
+      <button class="btn" id="pin">📌 Fixar</button>
+      <button class="btn" id="mode">👁️ Visualizar</button>
+      <button class="btn" id="copy">📋 Copiar</button>
+      <button class="btn danger" id="del">🗑️</button>
+    </div>
+    <div class="fmt" id="fmt">
+      <button class="btn" data-w="**">N</button>
+      <button class="btn" data-w="*"><i>I</i></button>
+      <button class="btn" data-w="`">&lt;/&gt;</button>
+      <button class="btn" data-l="# ">T1</button>
+      <button class="btn" data-l="## ">T2</button>
+      <button class="btn" data-l="- ">• Lista</button>
+      <button class="btn" data-l="- [ ] ">☑ Tarefa</button>
+      <button class="btn" data-l="&gt; ">❝ Citação</button>
+    </div>
+    <input id="title" placeholder="Título da nota">
+    <textarea id="body" placeholder="Escreva aqui… use #etiquetas e formatação Markdown."></textarea>
+    <div id="prev" hidden></div>
+    <div class="foot"><span id="stats"></span><span id="when"></span></div>
+    <div id="none" hidden>Crie ou selecione uma nota<br>para começar. ✍️</div>
+  </section>
+</main>
+
+<div id="toast"><span id="msg"></span><button id="undo">Desfazer</button></div>
+
+<dialog id="lookdlg">
+  <h2>🎨 Aparência</h2>
+  <div class="lbl">Cor do tema</div>
+  <div class="sws" id="sw"></div>
+  <div class="lbl">Modo</div>
+  <div class="row" id="modes">
+    <button class="btn" data-m="light">☀️ Claro</button>
+    <button class="btn" data-m="dark">🌙 Escuro</button>
+    <button class="btn" data-m="auto">Automático</button>
+  </div>
+  <div class="lbl">Fonte da interface</div>
+  <select id="fui"></select>
+  <div class="lbl">Fonte das notas</div>
+  <select id="fnt"></select>
+  <div class="lbl">Tamanho do texto</div>
+  <input type="range" id="fsz" min="0.85" max="1.5" step="0.05">
+  <div id="demo"><b>Pré-visualização:</b> a rápida raposa marrom salta sobre o cão preguiçoso. 1234567890</div>
+  <p style="display:flex;justify-content:space-between;margin-bottom:0"><button class="btn" id="reset">Restaurar padrão</button><button class="btn primary" onclick="document.getElementById('lookdlg').close()">Pronto</button></p>
+</dialog>
+
+<dialog id="dlg">
+  <h2>📝 Sobre o projeto</h2>
+  <p>Bloco de notas feito para um trabalho escolar. Tudo é salvo automaticamente no seu navegador, sem cadastro e sem internet.</p>
+  <ul>
+    <li><b>Organização:</b> cores, fixar notas, etiquetas com <kbd>#tag</kbd> e lixeira com restauração.</li>
+    <li><b>Escrita:</b> formatação Markdown, listas de tarefas clicáveis e modo de visualização.</li>
+    <li><b>Estatísticas:</b> palavras, caracteres e tempo de leitura.</li>
+  </ul>
+  <p><b>Atalhos:</b> <kbd>Alt</kbd>+<kbd>N</kbd> nova nota · <kbd>Ctrl</kbd>+<kbd>K</kbd> buscar · <kbd>Ctrl</kbd>+<kbd>B</kbd> negrito · <kbd>Ctrl</kbd>+<kbd>I</kbd> itálico · <kbd>Alt</kbd>+<kbd>P</kbd> visualizar</p>
+  <p style="text-align:right"><button class="btn primary" onclick="dlg.close()">Fechar</button></p>
+</dialog>
+
+<script>
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var KEY = "notas-pro-v2";
+var COLORS = ["", "#e8a33d", "#4a9d6e", "#4a86d6", "#c8567a"];
+
+/* ---------- Armazenamento ---------- */
+function get(k, d){ try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } }
+function set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+
+var notes = get(KEY, []);
+var current = null, filter = "all", tag = null, preview = false, lastDeleted = null, toastTimer;
+
+/* ---------- Utilidades ---------- */
+function esc(s){ return s.replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function fmt(ts){ return new Date(ts).toLocaleString("pt-BR", {dateStyle:"short", timeStyle:"short"}); }
+function find(id){ return notes.filter(function(n){ return n.id === id; })[0]; }
+function tagsOf(n){ var m = (n.body.match(/(^|\s)#[\p{L}\d_-]+/gu) || []).map(function(t){ return t.trim().toLowerCase(); }); return m.filter(function(t,i){ return m.indexOf(t) === i; }); }
+function save(){ set(KEY, notes); }
+function toast(text, undo){
+  $("msg").textContent = text; $("undo").style.display = undo ? "" : "none";
+  $("toast").classList.add("show"); clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ $("toast").classList.remove("show"); }, 4500);
+}
+
+/* ---------- Markdown simples ---------- */
+function inline(s){
+  return esc(s).replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>")
+    .replace(/\*([^*]+)\*/g,"<i>$1</i>").replace(/(^|\s)(#[\p{L}\d_-]+)/gu,'$1<span class="tag">$2</span>');
+}
+function md(text){
+  var out = "", open = false;
+  text.split("\n").forEach(function(line, i){
+    var m, li = null;
+    if ((m = line.match(/^- \[( |x)\] (.*)/i))) li = '<li class="chk"><input type="checkbox" data-line="'+i+'"'+(m[1] !== " " ? " checked" : "")+'> '+inline(m[2])+'</li>';
+    else if ((m = line.match(/^[-*] (.*)/))) li = "<li>"+inline(m[1])+"</li>";
+    if (li){ if (!open){ out += "<ul>"; open = true; } out += li; return; }
+    if (open){ out += "</ul>"; open = false; }
+    if ((m = line.match(/^(#{1,3}) (.*)/))) out += "<h"+m[1].length+">"+inline(m[2])+"</h"+m[1].length+">";
+    else if ((m = line.match(/^> (.*)/))) out += "<blockquote>"+inline(m[1])+"</blockquote>";
+    else if (line.trim()) out += "<p>"+inline(line)+"</p>";
+  });
+  return out + (open ? "</ul>" : "");
+}
+
+/* ---------- Lista ---------- */
+function visible(){
+  var q = $("search").value.toLowerCase(), s = $("sort").value;
+  var r = notes.filter(function(n){
+    if (filter === "trash" ? !n.trashed : n.trashed) return false;
+    if (filter === "pinned" && !n.pinned) return false;
+    if (tag && tagsOf(n).indexOf(tag) < 0) return false;
+    return (n.title + " " + n.body).toLowerCase().indexOf(q) > -1;
+  });
+  r.sort(function(a,b){
+    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+    if (s === "title") return (a.title || "").localeCompare(b.title || "", "pt-BR");
+    return b[s] - a[s];
+  });
+  return r;
+}
+function renderList(){
+  var items = visible();
+  $("list").innerHTML = items.length ? items.map(function(n){
+    return '<li data-id="'+n.id+'" class="'+(n.id === current ? "sel" : "")+'" style="border-left-color:'+(COLORS[n.color||0] || "transparent")+'">'+
+      '<b>'+(n.pinned ? "📌 " : "")+esc(n.title || "Sem título")+'</b><small>'+esc(n.body.replace(/\s+/g," ").slice(0,70) || "Nota vazia")+'</small><small>'+fmt(n.updated)+'</small></li>';
+  }).join("") : '<li class="empty">Nenhuma nota aqui.</li>';
+  $("count").textContent = items.length + (items.length === 1 ? " nota" : " notas");
+  var all = {}; notes.forEach(function(n){ if (!n.trashed) tagsOf(n).forEach(function(t){ all[t] = 1; }); });
+  $("tags").innerHTML = Object.keys(all).sort().map(function(t){ return '<button class="btn'+(t === tag ? " on" : "")+'" data-t="'+esc(t)+'">'+esc(t)+'</button>'; }).join("");
+  Array.prototype.forEach.call($("filters").children, function(b){ b.classList.toggle("on", b.dataset.f === filter); });
+}
+
+/* ---------- Editor ---------- */
+function renderDots(n){
+  $("dots").innerHTML = COLORS.map(function(c, i){
+    return '<button class="dot'+((n.color||0) === i ? " on" : "")+'" data-c="'+i+'" style="background:'+(c || "var(--panel)")+'" aria-label="Cor '+i+'"></button>';
+  }).join("");
+}
+function stats(n){
+  if (!n){ $("stats").textContent = ""; $("when").textContent = ""; return; }
+  var w = (n.body.trim().match(/\S+/g) || []).length;
+  $("stats").textContent = w + " palavras · " + n.body.length + " caracteres · " + Math.max(1, Math.ceil(w / 200)) + " min de leitura";
+  $("when").textContent = "Criada " + fmt(n.created) + " · editada " + fmt(n.updated);
+}
+function show(){
+  var n = find(current), has = !!n;
+  ["dots","fmt","title","body","prev"].forEach(function(id){ $(id).hidden = !has; });
+  document.querySelector(".top").style.visibility = has ? "" : "hidden";
+  $("none").hidden = has;
+  if (!has){ stats(null); return; }
+  $("title").value = n.title; $("body").value = n.body;
+  $("title").readOnly = $("body").readOnly = !!n.trashed;
+  $("pin").textContent = n.pinned ? "📌 Desafixar" : "📌 Fixar";
+  $("del").textContent = n.trashed ? "♻️ Restaurar" : "🗑️";
+  $("mode").classList.toggle("on", preview);
+  $("body").hidden = preview; $("prev").hidden = !preview; $("fmt").hidden = preview;
+  if (preview) $("prev").innerHTML = md(n.body);
+  renderDots(n); stats(n);
+}
+function touch(n){ n.updated = Date.now(); save(); renderList(); stats(n); }
+
+/* ---------- Eventos ---------- */
+function newNote(){
+  var n = {id: String(Date.now()), title:"", body:"", color:0, pinned:false, trashed:false, created:Date.now(), updated:Date.now()};
+  notes.push(n); current = n.id; filter = "all"; tag = null; preview = false; save(); renderList(); show();
+  $("main").classList.add("editing"); $("title").focus();
+}
+$("new").onclick = newNote;
+$("list").onclick = function(e){
+  var li = e.target.closest("li[data-id]"); if (!li) return;
+  current = li.dataset.id; renderList(); show(); $("main").classList.add("editing");
+};
+$("back").onclick = function(){ $("main").classList.remove("editing"); };
+$("search").oninput = renderList; $("sort").onchange = renderList;
+$("filters").onclick = function(e){ if (e.target.dataset.f){ filter = e.target.dataset.f; renderList(); } };
+$("tags").onclick = function(e){ var t = e.target.dataset.t; if (t){ tag = tag === t ? null : t; renderList(); } };
+$("title").oninput = function(){ var n = find(current); if (n){ n.title = this.value; touch(n); } };
+$("body").oninput = function(){ var n = find(current); if (n){ n.body = this.value; touch(n); } };
+$("dots").onclick = function(e){ var c = e.target.dataset.c, n = find(current); if (c !== undefined && n){ n.color = +c; renderDots(n); touch(n); } };
+$("pin").onclick = function(){ var n = find(current); if (n){ n.pinned = !n.pinned; touch(n); show(); } };
+$("mode").onclick = function(){ preview = !preview; show(); };
+$("copy").onclick = function(){
+  var n = find(current); if (!n) return;
+  try { navigator.clipboard.writeText((n.title ? n.title + "\n\n" : "") + n.body).then(function(){ toast("Nota copiada!"); }, function(){ toast("Não foi possível copiar."); }); }
+  catch(e){ toast("Não foi possível copiar."); }
+};
+$("del").onclick = function(){
+  var n = find(current); if (!n) return;
+  if (n.trashed){ n.trashed = false; toast("Nota restaurada."); touch(n); show(); renderList(); return; }
+  n.trashed = true; lastDeleted = n.id; save(); toast("Nota movida para a lixeira.", true);
+  current = null; renderList(); show(); $("main").classList.remove("editing");
+};
+$("undo").onclick = function(){
+  var n = find(lastDeleted); if (n){ n.trashed = false; save(); current = n.id; renderList(); show(); }
+  $("toast").classList.remove("show");
+};
+$("prev").onchange = function(e){
+  var n = find(current), ln = e.target.dataset.line; if (!n || ln === undefined) return;
+  var lines = n.body.split("\n");
+  lines[ln] = lines[ln].replace(/\[( |x)\]/i, e.target.checked ? "[x]" : "[ ]");
+  n.body = lines.join("\n"); touch(n); $("body").value = n.body;
+};
+
+/* Barra de formatação */
+$("fmt").onclick = function(e){
+  var b = e.target.closest("button"), t = $("body"); if (!b) return;
+  var s = t.selectionStart, en = t.selectionEnd, v = t.value;
+  if (b.dataset.w){
+    var w = b.dataset.w;
+    t.value = v.slice(0,s) + w + (v.slice(s,en) || "texto") + w + v.slice(en);
+    t.selectionStart = s + w.length; t.selectionEnd = s + w.length + (en > s ? en - s : 5);
+  } else {
+    var ls = v.lastIndexOf("\n", s - 1) + 1;
+    t.value = v.slice(0, ls) + b.dataset.l + v.slice(ls);
+    t.selectionStart = t.selectionEnd = s + b.dataset.l.length;
+  }
+  t.focus(); t.dispatchEvent(new Event("input"));
+};
+
+/* Atalhos */
+document.addEventListener("keydown", function(e){
+  var mod = e.ctrlKey || e.metaKey;
+  if (e.altKey && e.key.toLowerCase() === "n"){ e.preventDefault(); newNote(); }
+  else if (e.altKey && e.key.toLowerCase() === "p"){ e.preventDefault(); $("mode").click(); }
+  else if (mod && e.key.toLowerCase() === "k"){ e.preventDefault(); $("main").classList.remove("editing"); $("search").focus(); }
+  else if (mod && e.target === $("body") && (e.key === "b" || e.key === "i")){ e.preventDefault(); document.querySelector('[data-w="'+(e.key === "b" ? "**" : "*")+'"]').click(); }
+});
+
+/* Tema e sobre */
+var dlg = $("dlg");
+$("about").onclick = function(){ dlg.showModal(); };
+try { var th = localStorage.getItem("notas-tema"); if (th) document.documentElement.dataset.theme = th; } catch(e){}
+$("theme").onclick = function(){
+  var d = document.documentElement;
+  var dark = d.dataset.theme ? d.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  d.dataset.theme = dark ? "light" : "dark";
+  applyLook();
+  try { localStorage.setItem("notas-tema", d.dataset.theme); } catch(e){}
+};
+
+/* Primeira visita */
+if (!notes.length){
+  var now = Date.now();
+  notes.push({id:"1", title:"Bem-vindo! 👋", color:1, pinned:true, trashed:false, created:now, updated:now,
+    body:"# Seu novo bloco de notas\n\nTudo é salvo **automaticamente** neste navegador.\n\n- Use #etiquetas para organizar\n- Fixe notas importantes\n- Apague sem medo: a lixeira guarda tudo\n\n## Experimente\n- [x] Abrir o app\n- [ ] Criar sua primeira nota\n- [ ] Clicar em Visualizar\n\n> Dica: Alt+N cria uma nota nova. #dicas"});
+  save();
+}
+current = notes.filter(function(n){ return !n.trashed; }).length && window.innerWidth > 760 ? visible()[0].id : null;
+renderList(); show();
+
+/* ---------- Aparência: cores, modo e fontes ---------- */
+var PAL = {
+  ambar:["Âmbar","#d98f1f"],
+  oceano:["Oceano","#2b7bbf",["#eef4f8","#2b7bbf","#dcebf7","#ffffff"],["#0f1a22","#5aa9e6","#1c3445","#0b141a"]],
+  floresta:["Floresta","#3a8a5a",["#eef5ef","#3a8a5a","#dcefe2","#ffffff"],["#121a15","#5cbf84","#1f3a2a","#0c150f"]],
+  rosa:["Rosa","#c8497a",["#f9eff2","#c8497a","#f8dfe8","#ffffff"],["#1d1217","#ee7aa5","#3d1f2d","#1a0e13"]],
+  roxo:["Roxo","#7a55c9",["#f3f0fa","#7a55c9","#e6dff7","#ffffff"],["#17131f","#a98af0","#2f2646","#130f1b"]],
+  coral:["Coral","#e0583f",["#faf0ec","#e0583f","#f9dfd8","#ffffff"],["#1e1412","#ff8a72","#40231d","#1a0f0c"]],
+  grafite:["Grafite","#555555",["#eeeeee","#444444","#dddddd","#ffffff"],["#121212","#cfcfcf","#2c2c2c","#111111"]]
+};
+var SANS = '"Inter",system-ui,sans-serif', SERIF = '"Lora",Georgia,serif', MERRI = '"Merriweather",Georgia,serif';
+var FUI = {
+  padrao:["Padrão do sistema",""], inter:["Inter",SANS], poppins:["Poppins",'"Poppins",system-ui,sans-serif'],
+  lora:["Lora (serifada)",SERIF], merri:["Merriweather (serifada)",MERRI]
+};
+var FNT = {
+  padrao:["Padrão (código)",""], inter:["Inter (moderna)",SANS], lora:["Lora (serifada)",SERIF], merri:["Merriweather (leitura)",MERRI],
+  caveat:["Caveat (manuscrita)",'"Caveat","Comic Sans MS",cursive'], jb:["JetBrains Mono (código)",'"JetBrains Mono",ui-monospace,monospace']
+};
+var DEF = {p:"ambar", ui:"padrao", nt:"padrao", fs:1};
+var LK = Object.assign({}, DEF, get("notas-look", {}));
+
+function isDark(){ var t = document.documentElement.dataset.theme; return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; }
+function fill(sel, obj){ $(sel).innerHTML = Object.keys(obj).map(function(k){ return '<option value="'+k+'">'+obj[k][0]+'</option>'; }).join(""); }
+$("sw").innerHTML = Object.keys(PAL).map(function(k){ return '<button class="sw" data-p="'+k+'" title="'+PAL[k][0]+'" aria-label="'+PAL[k][0]+'" style="background:'+PAL[k][1]+'"></button>'; }).join("");
+fill("fui", FUI); fill("fnt", FNT);
+
+function applyLook(){
+  var s = document.documentElement.style, p = PAL[LK.p] || PAL.ambar, v = p[2] && (isDark() ? p[3] : p[2]);
+  ["--bg","--accent","--sel","--on"].forEach(function(k, i){ if (v) s.setProperty(k, v[i]); else s.removeProperty(k); });
+  var u = (FUI[LK.ui] || FUI.padrao)[1], n = (FNT[LK.nt] || FNT.padrao)[1];
+  if (u) s.setProperty("--ui", u); else s.removeProperty("--ui");
+  if (n) s.setProperty("--note", n); else s.removeProperty("--note");
+  s.setProperty("--fs", LK.fs);
+  Array.prototype.forEach.call($("sw").children, function(b){ b.classList.toggle("on", b.dataset.p === LK.p); });
+  var m = document.documentElement.dataset.theme || "auto";
+  Array.prototype.forEach.call($("modes").children, function(b){ b.classList.toggle("on", b.dataset.m === m); });
+  $("fui").value = LK.ui; $("fnt").value = LK.nt; $("fsz").value = LK.fs;
+}
+function setLook(){ set("notas-look", LK); applyLook(); }
+
+$("lookbtn").onclick = function(){ $("lookdlg").showModal(); };
+$("sw").onclick = function(e){ var p = e.target.dataset.p; if (p){ LK.p = p; setLook(); } };
+$("fui").onchange = function(){ LK.ui = this.value; setLook(); };
+$("fnt").onchange = function(){ LK.nt = this.value; setLook(); };
+$("fsz").oninput = function(){ LK.fs = +this.value; setLook(); };
+$("reset").onclick = function(){ LK = Object.assign({}, DEF); setLook(); };
+$("modes").onclick = function(e){
+  var m = e.target.dataset.m; if (!m) return;
+  var d = document.documentElement;
+  if (m === "auto"){ delete d.dataset.theme; try { localStorage.removeItem("notas-tema"); } catch(x){} }
+  else { d.dataset.theme = m; try { localStorage.setItem("notas-tema", m); } catch(x){} }
+  applyLook();
+};
+try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyLook); } catch(e){}
+applyLook();
+</script>
+</body>
+</html>
